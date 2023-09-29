@@ -1,0 +1,32 @@
+{
+	"name": "mvccore/ext-cache-memcached",
+	"type": "library",
+	"description": "MvcCore - Extension - Cache - Memcached - cache implementation extension for Memcached.",
+	"keywords": [
+		"mvc",
+		"mvccore",
+		"framework",
+		"extension",
+		"plugin",
+		"plug-in",
+		"ext",
+		"cache",
+		"store",
+		"memcached"
+	],
+	"license": ["BSD-3-Clause"],
+	"authors": [{
+		"name": "Tom Flidr",
+		"homepage": "https://github.com/tomFlidr"
+	}],
+	"require": {
+		"php": ">=5.4.0",
+		"mvccore/ext-cache": "^5.0"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"minimum-stability": "dev"
+}
