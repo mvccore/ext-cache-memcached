@@ -43,7 +43,7 @@ implements	\MvcCore\Ext\ICache {
 	 * Comparison by PHP function version_compare();
 	 * @see http://php.net/manual/en/function.version-compare.php
 	 */
-	const VERSION = '5.2.0';
+	const VERSION = '5.2.1';
 
 	/** @var array */
 	protected static $defaults	= [
@@ -144,7 +144,7 @@ implements	\MvcCore\Ext\ICache {
 		$mcConstBegin = '\Memcached::';
 		foreach ($provConfigDefault as $constStr => $rawValue) {
 			$const = constant($constStr);
-			if (!isset($provConfig[$const])) {
+			if (!isset($provConfig[$const]) && !isset($provConfig[$constStr])) {
 				if (is_string($rawValue) && strpos($rawValue, $mcConstBegin) === 0) {
 					if (!defined($rawValue))
 						continue;
@@ -155,13 +155,22 @@ implements	\MvcCore\Ext\ICache {
 				$provConfig[$const] = $value;
 			}
 		}
-		if (!isset($provConfig[\Memcached::OPT_SERIALIZER]))
+		if (!isset($provConfig[\Memcached::OPT_SERIALIZER]) && !isset($provConfig['\Memcached::OPT_SERIALIZER']))
 			$provConfig[\Memcached::OPT_SERIALIZER] = $this->provider->getOption(\Memcached::HAVE_IGBINARY)
 				? \Memcached::SERIALIZER_IGBINARY
 				: \Memcached::SERIALIZER_PHP;
 		$this->provider->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $this->config->{$timeoutKey} * 1000);
-		foreach ($provConfig as $provOptKey => $provOptVal)
+		foreach ($provConfig as $provOptKey => $provOptVal) {
+			if (is_string($provOptKey) && strpos($provOptKey, $mcConstBegin) === 0) {
+				if (defined($provOptKey))
+					$provOptKey = constant($provOptKey);
+			}
+			if (is_string($provOptVal) && strpos($provOptVal, $mcConstBegin) === 0) {
+				if (defined($provOptVal))
+					$provOptVal = constant($provOptVal);
+			}
 			$this->provider->setOption($provOptKey, $provOptVal);
+		}
 		// configure servers:
 		$hosts = [];
 		$ports = [];
