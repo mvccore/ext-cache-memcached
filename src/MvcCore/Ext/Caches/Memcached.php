@@ -43,7 +43,7 @@ implements	\MvcCore\Ext\ICache {
 	 * Comparison by PHP function version_compare();
 	 * @see http://php.net/manual/en/function.version-compare.php
 	 */
-	const VERSION = '5.2.2';
+	const VERSION = '5.2.3';
 
 	/** @var array */
 	protected static $defaults	= [
@@ -102,15 +102,15 @@ implements	\MvcCore\Ext\ICache {
 					$this->provider = new \Memcached();
 				}
 				if (
-					count($this->provider->getServerList()) > 0 && 
-					$this->provider->isPersistent()
+					count($this->provider->getServerList()) === 0 || 
+					!$this->provider->isPersistent()
 				) {
-					$this->connected = TRUE;
-				} else {
 					$this->connectConfigure();
-					$this->connected = $this->connectExecute();
 				}
-				$this->enabled = $this->connected;
+				$version = $this->provider->getVersion(); // real server or server pool connection execution
+				if ($version === FALSE)
+					throw new \Exception("Memcached service is not running.");
+				$this->enabled = ($this->connected = $version !== FALSE);
 				if ($this->enabled)
 					$this->provider->setOption(
 						\Memcached::OPT_PREFIX_KEY, 
@@ -196,21 +196,6 @@ implements	\MvcCore\Ext\ICache {
 			$this->provider->addServer(
 				$host, $ports[$index], $priorities[$index]
 			);
-	}
-
-	/**
-	 * Process every request connection or first persistent connection.
-	 * @return bool
-	 */
-	protected function connectExecute () {
-		$toolClass	= $this->application->GetToolClass();
-		$version = $toolClass::Invoke(
-			[$this->provider, 'getVersion'], [],
-			function ($errMsg, $errLevel, $errLine, $errContext) use (& $version) {
-				$version = NULL;
-			}
-		);
-		return is_string($version);
 	}
 
 	/**
