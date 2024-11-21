@@ -43,7 +43,7 @@ implements	\MvcCore\Ext\ICache {
 	 * Comparison by PHP function version_compare();
 	 * @see http://php.net/manual/en/function.version-compare.php
 	 */
-	const VERSION = '5.2.4';
+	const VERSION = '5.3.0';
 
 	/** @var array */
 	protected static $defaults	= [
